@@ -30,7 +30,11 @@ public class ContactListAdapter extends RecyclerView.Adapter {
         Contact contact = data.get(position);
         ((ContactListViewHolder) holder).phoneNumberTextView.setText(contact.phoneNumber);
         ((ContactListViewHolder) holder).contactNameTextView.setText(contact.contactName);
-        ((ContactListViewHolder) holder).contactPhotoImageView.setImageBitmap(contact.contactPhoto);
+        if (contact.contactPhoto != null) {
+            ((ContactListViewHolder) holder).contactPhotoImageView.setImageBitmap(contact.contactPhoto);
+        } else {
+            ((ContactListViewHolder) holder).contactPhotoImageView.setImageResource(R.drawable.ic_account_box_black_24px);
+        }
     }
 
     public int getItemCount() {

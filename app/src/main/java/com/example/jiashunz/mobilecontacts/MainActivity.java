@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }*/
 
-            if (photo != null) photo = BitmapFactory.decodeStream(openPhoto(new Long(id)));
+            photo = BitmapFactory.decodeStream(openPhoto(new Long(id)));
 
             contacts.add(new Contact(number, name, photo));
 
