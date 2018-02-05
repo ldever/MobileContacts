@@ -23,6 +23,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Date;
 
@@ -108,6 +110,12 @@ public class MainActivity extends AppCompatActivity {
             contacts.add(new Contact(number, name, photo));
 
         }
+        Collections.sort(contacts, new Comparator<Contact>() {
+            @Override
+            public int compare(Contact a, Contact b) {
+                return a.contactName.compareTo(b.contactName);
+            }
+        });
         return contacts;
     }
 
