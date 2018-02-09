@@ -2,6 +2,7 @@ package com.example.jiashunz.mobilecontacts;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -15,8 +16,15 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.os.Bundle;
 import android.database.Cursor;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.Manifest;
+import android.view.Gravity;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 
 
@@ -34,14 +42,72 @@ public class MainActivity extends AppCompatActivity {
     final int PERMISSIONS_REQUEST_CONTACTS = 1;
     final String PERMISSIONS_READ_CONTACTS = "android.permission.READ_CONTACTS";
     SwipeRefreshLayout refreshLayout = null;
+    EditText searchEditText = null;
+    Button cancelButton = null;
+    List<Contact> contacts = new ArrayList<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        setupEditListener();
         setupRefreshListener();
         setupUI();
+    }
+
+    private void setupEditListener() {
+        searchEditText = (EditText) findViewById(R.id.searchEditText);
+        searchEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                searchList(s);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                Log.e("after", "after");
+            }
+        });
+        searchEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean hasFocus) {
+                if (hasFocus) {
+                    cancelButton.setVisibility(Button.VISIBLE);
+                    searchEditText.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
+                } else {
+                    cancelButton.setVisibility(Button.GONE);
+                    searchEditText.setGravity(Gravity.CENTER);
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(searchEditText.getWindowToken(), 0);
+                }
+            }
+        });
+        cancelButton = (Button) findViewById(R.id.cancel_button);
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                findViewById(R.id.main_layout).requestFocus();
+                searchEditText.setText("");
+            }
+        });
+    }
+
+    public void searchList(CharSequence s) {
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.contact_recycler_view);
+        List<Contact> resultList = new ArrayList<>();
+        for (int i = 0; i < contacts.size(); i++) {
+            Contact contact = contacts.get(i);
+            if (contact.contactName.toLowerCase().indexOf(s.toString().toLowerCase()) != -1) {
+                resultList.add(contact);
+            }
+        }
+        recyclerView.setAdapter(new ContactListAdapter(resultList));
     }
 
     private void setupRefreshListener() {
@@ -59,9 +125,9 @@ public class MainActivity extends AppCompatActivity {
     private void refreshList() {
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.contact_recycler_view);
 
-        List<Contact> calls = getData();
+        getData();
 
-        recyclerView.setAdapter(new ContactListAdapter(calls));
+        recyclerView.setAdapter(new ContactListAdapter(contacts));
 
         onRefreshComplete();
     }
@@ -74,12 +140,10 @@ public class MainActivity extends AppCompatActivity {
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.contact_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        List<Contact> contacts = new ArrayList<>();
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_CONTACTS);
         } else {
-           contacts = getData();
+           getData();
         }
 
         recyclerView.setAdapter(new ContactListAdapter(contacts));
@@ -97,9 +161,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     @NonNull
-    private List<Contact> getData() {
-
-        List<Contact> contacts = new ArrayList<>();
+    private void getData() {
 
         ContentResolver resolver = getContentResolver();
         Cursor cursor = resolver.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
@@ -145,7 +207,6 @@ public class MainActivity extends AppCompatActivity {
                 return a.contactName.compareTo(b.contactName);
             }
         });
-        return contacts;
     }
 
     public InputStream openPhoto(long contactId) {
