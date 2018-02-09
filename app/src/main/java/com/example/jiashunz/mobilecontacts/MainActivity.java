@@ -25,17 +25,15 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Date;
+
 
 
 public class MainActivity extends AppCompatActivity {
@@ -66,12 +64,12 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                //Listen to text change and search the list
                 searchList(s);
             }
 
             @Override
             public void afterTextChanged(Editable s) {
-                Log.e("after", "after");
             }
         });
         searchEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -107,6 +105,7 @@ public class MainActivity extends AppCompatActivity {
                 resultList.add(contact);
             }
         }
+        //Set data on view
         recyclerView.setAdapter(new ContactListAdapter(resultList));
     }
 
@@ -115,8 +114,12 @@ public class MainActivity extends AppCompatActivity {
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                // Refresh items
-                refreshList();
+                if (!searchEditText.isFocused()) {
+                    // Refresh items
+                    refreshList();
+                } else {
+                    onRefreshComplete();
+                }
             }
         });
 
@@ -162,9 +165,10 @@ public class MainActivity extends AppCompatActivity {
 
     @NonNull
     private void getData() {
-
         ContentResolver resolver = getContentResolver();
         Cursor cursor = resolver.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
+
+        contacts = new ArrayList<>();
 
         int idIndex = cursor.getColumnIndex(ContactsContract.Contacts._ID);
         int nameIndex = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
@@ -180,21 +184,6 @@ public class MainActivity extends AppCompatActivity {
                 int tmp = phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
                 number = phoneCursor.getString(tmp);
             }
-
-            /*try {
-                InputStream inputStream = ContactsContract.Contacts.openContactPhotoInputStream(getContentResolver(),
-                        ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, new Long(id)));
-
-                if (inputStream != null) {
-                    photo = BitmapFactory.decodeStream(inputStream);
-                }
-
-                //assert inputStream != null;
-                if (inputStream != null) inputStream.close();
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }*/
 
             photo = BitmapFactory.decodeStream(openPhoto(new Long(id)));
 
