@@ -5,7 +5,6 @@ import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import java.util.List;
 
@@ -39,6 +38,11 @@ public class ContactListAdapter extends RecyclerView.Adapter {
         ((ContactListViewHolder) holder).imageTextView.setText(convertName(contact.contactName));
     }
 
+    /**
+     * This method is used to convert a contact name to initial.
+     * @param name contact name
+     * @return initial of contact name
+     */
     private String convertName(String name) {
         String[] strings = name.split(" ");
         if (strings.length == 2) {
@@ -46,9 +50,12 @@ public class ContactListAdapter extends RecyclerView.Adapter {
         } else {
             return String.valueOf(strings[0].charAt(0));
         }
-
     }
 
+    /**
+     * This method is used to return data size.
+     * @return data size
+     */
     public int getItemCount() {
         return data.size();
     }

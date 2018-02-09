@@ -18,7 +18,6 @@ import android.os.Bundle;
 import android.database.Cursor;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.Manifest;
 import android.view.Gravity;
 import android.view.View;
@@ -33,8 +32,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
-
 
 public class MainActivity extends AppCompatActivity {
     final int PERMISSIONS_REQUEST_CONTACTS = 1;
@@ -55,6 +52,9 @@ public class MainActivity extends AppCompatActivity {
         setupUI();
     }
 
+    /**
+     * This method is used to set up listener on edit text view.
+     */
     private void setupEditListener() {
         searchEditText = (EditText) findViewById(R.id.searchEditText);
         searchEditText.addTextChangedListener(new TextWatcher() {
@@ -81,6 +81,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     cancelButton.setVisibility(Button.GONE);
                     searchEditText.setGravity(Gravity.CENTER);
+                    //Hide soft keyboard
                     InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(searchEditText.getWindowToken(), 0);
                 }
@@ -96,28 +97,38 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * This method is used to search contact list based on keyword s and update the view.
+     * @param s keyword
+     */
     public void searchList(CharSequence s) {
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.contact_recycler_view);
         List<Contact> resultList = new ArrayList<>();
         for (int i = 0; i < contacts.size(); i++) {
             Contact contact = contacts.get(i);
+            //Case insensitive search applied here
             if (contact.contactName.toLowerCase().indexOf(s.toString().toLowerCase()) != -1) {
                 resultList.add(contact);
             }
         }
-        //Set data on view
+        //Update list on view
         recyclerView.setAdapter(new ContactListAdapter(resultList));
     }
 
+    /**
+     * This method is used to set up Refresh Listener on swipeRefreshLayout
+     */
     private void setupRefreshListener() {
         refreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                //When refresh, check if is in search list mode
                 if (!searchEditText.isFocused()) {
                     // Refresh items
                     refreshList();
                 } else {
+                    // Simply finish refresh
                     onRefreshComplete();
                 }
             }
@@ -125,30 +136,39 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * This method is used to get contact list agian and update view
+     */
     private void refreshList() {
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.contact_recycler_view);
 
         getData();
-
+        //Update List on view
         recyclerView.setAdapter(new ContactListAdapter(contacts));
 
         onRefreshComplete();
     }
 
+    /**
+     * This method is used to clear refresh animation
+     */
     private void onRefreshComplete() {
         refreshLayout.setRefreshing(false);
     }
 
+    /**
+     * This method is used to bind data to view
+     */
     private void setupUI() {
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.contact_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
+        //Check user permission, request permission if doesn't have
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, PERMISSIONS_REQUEST_CONTACTS);
         } else {
            getData();
         }
-
+        //Update list on view
         recyclerView.setAdapter(new ContactListAdapter(contacts));
     }
 
@@ -162,7 +182,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
+    /**
+     * This method is used to get contact list from cell phone.
+     */
     @NonNull
     private void getData() {
         ContentResolver resolver = getContentResolver();
@@ -198,6 +220,11 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * This method is used to open a photo based on contactId
+     * @param contactId unique id in contact list
+     * @return ByteArrayInputStream if photo is not null
+     */
     public InputStream openPhoto(long contactId) {
         Uri contactUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId);
         Uri photoUri = Uri.withAppendedPath(contactUri, ContactsContract.Contacts.Photo.CONTENT_DIRECTORY);
