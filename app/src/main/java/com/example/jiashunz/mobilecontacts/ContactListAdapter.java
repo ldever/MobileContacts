@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import java.util.List;
 
@@ -33,8 +34,19 @@ public class ContactListAdapter extends RecyclerView.Adapter {
         if (contact.contactPhoto != null) {
             ((ContactListViewHolder) holder).contactPhotoImageView.setImageBitmap(contact.contactPhoto);
         } else {
-            ((ContactListViewHolder) holder).contactPhotoImageView.setImageResource(R.drawable.ic_account_box_black_24px);
+            ((ContactListViewHolder) holder).contactPhotoImageView.setImageResource(R.drawable.purple);
         }
+        ((ContactListViewHolder) holder).imageTextView.setText(convertName(contact.contactName));
+    }
+
+    private String convertName(String name) {
+        String[] strings = name.split(" ");
+        if (strings.length == 2) {
+            return String.valueOf(strings[0].charAt(0)) + String.valueOf(strings[1].charAt(0));
+        } else {
+            return String.valueOf(strings[0].charAt(0));
+        }
+
     }
 
     public int getItemCount() {

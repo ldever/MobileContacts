@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -32,13 +33,41 @@ import java.util.Date;
 public class MainActivity extends AppCompatActivity {
     final int PERMISSIONS_REQUEST_CONTACTS = 1;
     final String PERMISSIONS_READ_CONTACTS = "android.permission.READ_CONTACTS";
+    SwipeRefreshLayout refreshLayout = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        setupRefreshListener();
         setupUI();
+    }
+
+    private void setupRefreshListener() {
+        refreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                // Refresh items
+                refreshList();
+            }
+        });
+
+    }
+
+    private void refreshList() {
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.contact_recycler_view);
+
+        List<Contact> calls = getData();
+
+        recyclerView.setAdapter(new ContactListAdapter(calls));
+
+        onRefreshComplete();
+    }
+
+    private void onRefreshComplete() {
+        refreshLayout.setRefreshing(false);
     }
 
     private void setupUI() {

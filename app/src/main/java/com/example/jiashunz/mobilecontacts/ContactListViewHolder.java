@@ -14,6 +14,7 @@ public class ContactListViewHolder extends RecyclerView.ViewHolder{
     TextView phoneNumberTextView;
     TextView contactNameTextView;
     ImageView contactPhotoImageView;
+    TextView imageTextView;
 
     public ContactListViewHolder(@NonNull View itemView) {
         super(itemView);
@@ -21,6 +22,7 @@ public class ContactListViewHolder extends RecyclerView.ViewHolder{
         phoneNumberTextView = (TextView) itemView.findViewById(R.id.phone_number);
         contactNameTextView = (TextView) itemView.findViewById(R.id.contact_name);
         contactPhotoImageView = (ImageView) itemView.findViewById(R.id.contact_photo);
+        imageTextView = (TextView) itemView.findViewById(R.id.imageText);
     }
 
 }

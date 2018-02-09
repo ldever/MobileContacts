@@ -1,14 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal" android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="12dp"
     android:background="#FFFFFF">
-    <ImageView
-        android:id="@+id/contact_photo"
-        android:layout_width="50dp"
-        android:layout_height="match_parent"
-        android:adjustViewBounds="true"/>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:id="@+id/contact_photo"
+            app:civ_border_color="#FFFFFF"
+            app:civ_border_width="0dp">
+        </de.hdodenhof.circleimageview.CircleImageView>
+
+        <TextView
+            android:id="@+id/imageText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@id/contact_photo"
+            android:layout_alignTop="@id/contact_photo"
+            android:layout_alignRight="@id/contact_photo"
+            android:layout_alignBottom="@id/contact_photo"
+            android:layout_margin="1dp"
+            android:gravity="center"
+            android:textColor="#FFFFFF" />
+    </RelativeLayout>
+
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
